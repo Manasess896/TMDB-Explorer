@@ -30,11 +30,13 @@ $maxPerType = 3; // Maximum 3 of each type
 
 // Filter items with backdrop images and overview
 foreach ($trendingAll['results'] as $item) {
-    if (isset($item['backdrop_path']) && !empty($item['backdrop_path']) && 
-        isset($item['overview']) && !empty($item['overview'])) {
-        
+    if (
+        isset($item['backdrop_path']) && !empty($item['backdrop_path']) &&
+        isset($item['overview']) && !empty($item['overview'])
+    ) {
+
         $isMovie = isset($item['title']);
-        
+
         // Ensure we have a balanced mix
         if ($isMovie && $movieCount < $maxPerType) {
             $heroSlides[] = $item;
@@ -43,7 +45,7 @@ foreach ($trendingAll['results'] as $item) {
             $heroSlides[] = $item;
             $tvCount++;
         }
-        
+
         // Stop when we have enough of both
         if ($movieCount >= $maxPerType && $tvCount >= $maxPerType) {
             break;
@@ -73,17 +75,17 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
 if ($page == 'discover') {
     $discoverType = isset($_GET['type']) ? $_GET['type'] : 'movie';
     $filters = [];
-    
+
     // Sort by options
     if (isset($_GET['sort_by']) && !empty($_GET['sort_by'])) {
         $filters['sort_by'] = $_GET['sort_by'];
     }
-    
+
     // Genre filter
     if (isset($_GET['with_genres']) && !empty($_GET['with_genres'])) {
         $filters['with_genres'] = $_GET['with_genres'];
     }
-    
+
     // Year filter
     if (isset($_GET['year']) && !empty($_GET['year'])) {
         if ($discoverType == 'movie') {
@@ -92,30 +94,31 @@ if ($page == 'discover') {
             $filters['first_air_date_year'] = $_GET['year'];
         }
     }
-    
+
     // Vote average filter
     if (isset($_GET['vote_average']) && !empty($_GET['vote_average'])) {
         $filters['vote_average.gte'] = $_GET['vote_average'];
     }
-    
+
     // Current page
     $currentPage = isset($_GET['discover_page']) ? intval($_GET['discover_page']) : 1;
     $filters['page'] = $currentPage;
-    
+
     // Get discover results
-    $discoverResults = $discoverType == 'movie' 
-        ? $tmdb->discoverMovies($filters) 
+    $discoverResults = $discoverType == 'movie'
+        ? $tmdb->discoverMovies($filters)
         : $tmdb->discoverTVShows($filters);
-    
+
     // Get genres for filter
-    $genres = $discoverType == 'movie' 
-        ? $tmdb->getMovieGenres() 
+    $genres = $discoverType == 'movie'
+        ? $tmdb->getMovieGenres()
         : $tmdb->getTVGenres();
 }
 ?>
 
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="<?= $theme ?>">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -124,6 +127,8 @@ if ($page == 'discover') {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="shortcut icon" href="images\tmdb-logo.jpg" type="image/x-icon">
+    <link rel="icon" href="images\tmdb-logo.jpg" type="image/jpg">
     <!-- AOS Animation Library -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <!-- Custom CSS -->
@@ -133,6 +138,7 @@ if ($page == 'discover') {
         <link rel="preload" as="image" href="<?= TMDB_IMAGE_BASE_URL . 'original' . $slide['backdrop_path'] ?>">
     <?php endforeach; ?>
 </head>
+
 <body class="<?= $theme ?>-mode">
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark">
@@ -162,14 +168,14 @@ if ($page == 'discover') {
                     </li>
                 </ul>
                 <form class="d-flex me-2" action="index.php" method="GET">
-                    <input class="form-control me-2" type="search" name="search" placeholder="Search..." 
-                           value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
+                    <input class="form-control me-2" type="search" name="search" placeholder="Search..."
+                        value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
                     <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
                 </form>
                 <div class="theme-switch-wrapper">
-                    <a href="?<?= http_build_query(array_merge($_GET, ['theme' => $theme == 'dark' ? 'light' : 'dark'])) ?>" 
-                       class="theme-switch btn btn-sm <?= $theme == 'dark' ? 'btn-light' : 'btn-dark' ?>" 
-                       aria-label="Toggle theme">
+                    <a href="?<?= http_build_query(array_merge($_GET, ['theme' => $theme == 'dark' ? 'light' : 'dark'])) ?>"
+                        class="theme-switch btn btn-sm <?= $theme == 'dark' ? 'btn-light' : 'btn-dark' ?>"
+                        aria-label="Toggle theme">
                         <i class="fas <?= $theme == 'dark' ? 'fa-sun' : 'fa-moon' ?>"></i>
                     </a>
                 </div>
@@ -189,14 +195,14 @@ if ($page == 'discover') {
                                 <div class="col-6 col-md-3 col-lg-2 mb-4" data-aos="fade-up">
                                     <div class="card content-card h-100">
                                         <a href="index.php?page=<?= $item['media_type'] == 'movie' ? 'movie' : 'tvshow' ?>&id=<?= $item['id'] ?>">
-                                            <img src="<?= TMDB_IMAGE_BASE_URL . TMDB_POSTER_SIZE . $item['poster_path'] ?>" 
-                                                 class="card-img-top" alt="<?= htmlspecialchars($item['title'] ?? $item['name']) ?>">
+                                            <img src="<?= TMDB_IMAGE_BASE_URL . TMDB_POSTER_SIZE . $item['poster_path'] ?>"
+                                                class="card-img-top" alt="<?= htmlspecialchars($item['title'] ?? $item['name']) ?>">
                                             <div class="card-body">
                                                 <h6 class="card-title"><?= htmlspecialchars($item['title'] ?? $item['name']) ?></h6>
                                                 <div class="d-flex justify-content-between align-items-center">
                                                     <span class="badge bg-primary"><?= ucfirst($item['media_type']) ?></span>
                                                     <span class="rating">
-                                                        <i class="fas fa-star text-warning"></i> 
+                                                        <i class="fas fa-star text-warning"></i>
                                                         <?= number_format($item['vote_average'], 1) ?>
                                                     </span>
                                                 </div>
@@ -219,19 +225,18 @@ if ($page == 'discover') {
         <section class="hero-slideshow">
             <?php foreach ($heroSlides as $index => $slide): ?>
                 <?php
-                    $isMovie = isset($slide['title']);
-                    $title = $isMovie ? $slide['title'] : $slide['name'];
-                    $id = $slide['id'];
-                    $type = $isMovie ? 'movie' : 'tvshow';
-                    $releaseDate = $isMovie ? 
-                        (isset($slide['release_date']) ? $slide['release_date'] : null) : 
-                        (isset($slide['first_air_date']) ? $slide['first_air_date'] : null);
-                    $year = $releaseDate ? date('Y', strtotime($releaseDate)) : 'N/A';
-                    $mediaType = $isMovie ? 'Movie' : 'TV Show';
+                $isMovie = isset($slide['title']);
+                $title = $isMovie ? $slide['title'] : $slide['name'];
+                $id = $slide['id'];
+                $type = $isMovie ? 'movie' : 'tvshow';
+                $releaseDate = $isMovie ?
+                    (isset($slide['release_date']) ? $slide['release_date'] : null) : (isset($slide['first_air_date']) ? $slide['first_air_date'] : null);
+                $year = $releaseDate ? date('Y', strtotime($releaseDate)) : 'N/A';
+                $mediaType = $isMovie ? 'Movie' : 'TV Show';
                 ?>
-                <div class="hero-slide <?= $index === 0 ? 'active' : '' ?>" 
-                     style="background-image: url('<?= TMDB_IMAGE_BASE_URL . 'original' . $slide['backdrop_path'] ?>');"
-                     data-id="<?= $index ?>">
+                <div class="hero-slide <?= $index === 0 ? 'active' : '' ?>"
+                    style="background-image: url('<?= TMDB_IMAGE_BASE_URL . 'original' . $slide['backdrop_path'] ?>');"
+                    data-id="<?= $index ?>">
                     <div class="container">
                         <div class="hero-content">
                             <h1 class="hero-title"><?= htmlspecialchars($title) ?></h1>
@@ -243,7 +248,7 @@ if ($page == 'discover') {
                                 <span><i class="fas fa-star text-warning"></i> <?= number_format($slide['vote_average'], 1) ?></span>
                             </div>
                             <p class="hero-overview"><?= htmlspecialchars($slide['overview']) ?></p>
-                            
+
                             <a href="index.php?page=<?= $type ?>&id=<?= $id ?>" class="btn btn-primary btn-lg">
                                 View Details <i class="fas fa-arrow-right ms-2"></i>
                             </a>
@@ -284,13 +289,13 @@ if ($page == 'discover') {
                                 <div class="card content-card h-100">
                                     <a href="index.php?page=movie&id=<?= $movie['id'] ?>">
                                         <div class="card-img-wrapper">
-                                            <img src="<?= TMDB_IMAGE_BASE_URL . TMDB_POSTER_SIZE . $movie['poster_path'] ?>" 
-                                                 class="card-img-top" alt="<?= htmlspecialchars($movie['title']) ?>">
+                                            <img src="<?= TMDB_IMAGE_BASE_URL . TMDB_POSTER_SIZE . $movie['poster_path'] ?>"
+                                                class="card-img-top" alt="<?= htmlspecialchars($movie['title']) ?>">
                                         </div>
                                         <div class="card-body">
                                             <h6 class="card-title"><?= htmlspecialchars($movie['title']) ?></h6>
                                             <div class="rating">
-                                                <i class="fas fa-star text-warning"></i> 
+                                                <i class="fas fa-star text-warning"></i>
                                                 <?= number_format($movie['vote_average'], 1) ?>
                                             </div>
                                         </div>
@@ -317,8 +322,8 @@ if ($page == 'discover') {
                                 <div class="card content-card h-100">
                                     <a href="index.php?page=movie&id=<?= $movie['id'] ?>">
                                         <div class="card-img-wrapper">
-                                            <img src="<?= TMDB_IMAGE_BASE_URL . TMDB_POSTER_SIZE . $movie['poster_path'] ?>" 
-                                                 class="card-img-top" alt="<?= htmlspecialchars($movie['title']) ?>">
+                                            <img src="<?= TMDB_IMAGE_BASE_URL . TMDB_POSTER_SIZE . $movie['poster_path'] ?>"
+                                                class="card-img-top" alt="<?= htmlspecialchars($movie['title']) ?>">
                                         </div>
                                         <div class="card-body">
                                             <h6 class="card-title"><?= htmlspecialchars($movie['title']) ?></h6>
@@ -351,13 +356,13 @@ if ($page == 'discover') {
                                 <div class="card content-card h-100">
                                     <a href="index.php?page=tvshow&id=<?= $tvshow['id'] ?>">
                                         <div class="card-img-wrapper">
-                                            <img src="<?= TMDB_IMAGE_BASE_URL . TMDB_POSTER_SIZE . $tvshow['poster_path'] ?>" 
-                                                 class="card-img-top" alt="<?= htmlspecialchars($tvshow['name']) ?>">
+                                            <img src="<?= TMDB_IMAGE_BASE_URL . TMDB_POSTER_SIZE . $tvshow['poster_path'] ?>"
+                                                class="card-img-top" alt="<?= htmlspecialchars($tvshow['name']) ?>">
                                         </div>
                                         <div class="card-body">
                                             <h6 class="card-title"><?= htmlspecialchars($tvshow['name']) ?></h6>
                                             <div class="rating">
-                                                <i class="fas fa-star text-warning"></i> 
+                                                <i class="fas fa-star text-warning"></i>
                                                 <?= number_format($tvshow['vote_average'], 1) ?>
                                             </div>
                                         </div>
@@ -384,13 +389,13 @@ if ($page == 'discover') {
                                 <div class="card content-card h-100">
                                     <a href="index.php?page=tvshow&id=<?= $tvshow['id'] ?>">
                                         <div class="card-img-wrapper">
-                                            <img src="<?= TMDB_IMAGE_BASE_URL . TMDB_POSTER_SIZE . $tvshow['poster_path'] ?>" 
-                                                 class="card-img-top" alt="<?= htmlspecialchars($tvshow['name']) ?>">
+                                            <img src="<?= TMDB_IMAGE_BASE_URL . TMDB_POSTER_SIZE . $tvshow['poster_path'] ?>"
+                                                class="card-img-top" alt="<?= htmlspecialchars($tvshow['name']) ?>">
                                         </div>
                                         <div class="card-body">
                                             <h6 class="card-title"><?= htmlspecialchars($tvshow['name']) ?></h6>
                                             <div class="rating">
-                                                <i class="fas fa-star text-warning"></i> 
+                                                <i class="fas fa-star text-warning"></i>
                                                 <?= number_format($tvshow['vote_average'], 1) ?>
                                             </div>
                                         </div>
@@ -487,19 +492,19 @@ if ($page == 'discover') {
                                     <div class="card content-card h-100">
                                         <a href="index.php?page=<?= $discoverType == 'movie' ? 'movie' : 'tvshow' ?>&id=<?= $item['id'] ?>">
                                             <div class="card-img-wrapper">
-                                                <img src="<?= TMDB_IMAGE_BASE_URL . TMDB_POSTER_SIZE . $item['poster_path'] ?>" 
-                                                     class="card-img-top" alt="<?= htmlspecialchars($item['title'] ?? $item['name']) ?>">
+                                                <img src="<?= TMDB_IMAGE_BASE_URL . TMDB_POSTER_SIZE . $item['poster_path'] ?>"
+                                                    class="card-img-top" alt="<?= htmlspecialchars($item['title'] ?? $item['name']) ?>">
                                             </div>
                                             <div class="card-body">
                                                 <h6 class="card-title"><?= htmlspecialchars($item['title'] ?? $item['name']) ?></h6>
                                                 <div class="d-flex justify-content-between align-items-center">
                                                     <small class="text-muted">
-                                                        <?= isset($item['release_date']) 
-                                                            ? substr($item['release_date'], 0, 4) 
+                                                        <?= isset($item['release_date'])
+                                                            ? substr($item['release_date'], 0, 4)
                                                             : (isset($item['first_air_date']) ? substr($item['first_air_date'], 0, 4) : 'N/A') ?>
                                                     </small>
                                                     <span class="rating">
-                                                        <i class="fas fa-star text-warning"></i> 
+                                                        <i class="fas fa-star text-warning"></i>
                                                         <?= number_format($item['vote_average'], 1) ?>
                                                     </span>
                                                 </div>
@@ -526,7 +531,7 @@ if ($page == 'discover') {
                             <?php
                             $startPage = max(1, $currentPage - 2);
                             $endPage = min($discoverResults['total_pages'], $currentPage + 2);
-                            for ($i = $startPage; $i <= $endPage; $i++): 
+                            for ($i = $startPage; $i <= $endPage; $i++):
                             ?>
                                 <li class="page-item <?= $i == $currentPage ? 'active' : '' ?>">
                                     <a class="page-link" href="<?= '?' . http_build_query(array_merge($_GET, ['discover_page' => $i])) ?>"><?= $i ?></a>
@@ -554,8 +559,8 @@ if ($page == 'discover') {
                 <div class="row">
                     <div class="col-md-4">
                         <?php if (isset($movie['poster_path'])): ?>
-                            <img src="<?= TMDB_IMAGE_BASE_URL . TMDB_POSTER_SIZE . $movie['poster_path'] ?>" 
-                                 class="img-fluid rounded shadow" alt="<?= htmlspecialchars($movie['title']) ?>">
+                            <img src="<?= TMDB_IMAGE_BASE_URL . TMDB_POSTER_SIZE . $movie['poster_path'] ?>"
+                                class="img-fluid rounded shadow" alt="<?= htmlspecialchars($movie['title']) ?>">
                         <?php endif; ?>
                     </div>
                     <div class="col-md-8">
@@ -565,7 +570,7 @@ if ($page == 'discover') {
                             <span class="me-3"><i class="fas fa-star text-warning"></i> <?= number_format($movie['vote_average'], 1) ?>/10</span>
                             <span class="me-3"><i class="fas fa-clock text-secondary"></i> <?= $movie['runtime'] ?> min</span>
                         </div>
-                        
+
                         <div class="mb-4">
                             <?php foreach ($movie['genres'] as $genre): ?>
                                 <span class="badge bg-secondary me-2"><?= $genre['name'] ?></span>
@@ -581,8 +586,8 @@ if ($page == 'discover') {
                                         <div class="card cast-card h-100">
                                             <a href="index.php?page=person&id=<?= $actor['id'] ?>">
                                                 <?php if (isset($actor['profile_path'])): ?>
-                                                    <img src="<?= TMDB_IMAGE_BASE_URL . 'w185' . $actor['profile_path'] ?>" 
-                                                         class="card-img-top" alt="<?= htmlspecialchars($actor['name']) ?>">
+                                                    <img src="<?= TMDB_IMAGE_BASE_URL . 'w185' . $actor['profile_path'] ?>"
+                                                        class="card-img-top" alt="<?= htmlspecialchars($actor['name']) ?>">
                                                 <?php else: ?>
                                                     <div class="no-image"><i class="fas fa-user"></i></div>
                                                 <?php endif; ?>
@@ -596,7 +601,7 @@ if ($page == 'discover') {
                                 <?php endforeach; ?>
                             </div>
                         <?php endif; ?>
-                        
+
                         <?php if (isset($movie['videos']) && isset($movie['videos']['results']) && count($movie['videos']['results']) > 0): ?>
                             <h5 class="mt-4">Videos</h5>
                             <div class="row">
@@ -628,12 +633,12 @@ if ($page == 'discover') {
                                 <div class="col-6 col-md-2 mb-4">
                                     <div class="card content-card h-100">
                                         <a href="index.php?page=movie&id=<?= $similarMovie['id'] ?>">
-                                            <img src="<?= TMDB_IMAGE_BASE_URL . 'w342' . $similarMovie['poster_path'] ?>" 
-                                                 class="card-img-top" alt="<?= htmlspecialchars($similarMovie['title']) ?>">
+                                            <img src="<?= TMDB_IMAGE_BASE_URL . 'w342' . $similarMovie['poster_path'] ?>"
+                                                class="card-img-top" alt="<?= htmlspecialchars($similarMovie['title']) ?>">
                                             <div class="card-body">
                                                 <h6 class="card-title"><?= htmlspecialchars($similarMovie['title']) ?></h6>
                                                 <div class="rating">
-                                                    <i class="fas fa-star text-warning"></i> 
+                                                    <i class="fas fa-star text-warning"></i>
                                                     <?= number_format($similarMovie['vote_average'], 1) ?>
                                                 </div>
                                             </div>
@@ -660,8 +665,8 @@ if ($page == 'discover') {
                 <div class="row">
                     <div class="col-md-4">
                         <?php if (isset($tvshow['poster_path'])): ?>
-                            <img src="<?= TMDB_IMAGE_BASE_URL . TMDB_POSTER_SIZE . $tvshow['poster_path'] ?>" 
-                                 class="img-fluid rounded shadow" alt="<?= htmlspecialchars($tvshow['name'] ?? 'TV Show') ?>">
+                            <img src="<?= TMDB_IMAGE_BASE_URL . TMDB_POSTER_SIZE . $tvshow['poster_path'] ?>"
+                                class="img-fluid rounded shadow" alt="<?= htmlspecialchars($tvshow['name'] ?? 'TV Show') ?>">
                         <?php endif; ?>
                     </div>
                     <div class="col-md-8">
@@ -677,7 +682,7 @@ if ($page == 'discover') {
                                 <span class="me-3"><i class="fas fa-film"></i> <?= count($tvshow['seasons']) ?> Seasons</span>
                             <?php endif; ?>
                         </div>
-                        
+
                         <?php if (isset($tvshow['genres']) && is_array($tvshow['genres']) && !empty($tvshow['genres'])): ?>
                             <div class="mb-4">
                                 <?php foreach ($tvshow['genres'] as $genre): ?>
@@ -685,12 +690,12 @@ if ($page == 'discover') {
                                 <?php endforeach; ?>
                             </div>
                         <?php endif; ?>
-                        
+
                         <?php if (isset($tvshow['overview']) && !empty($tvshow['overview'])): ?>
                             <h5>Overview</h5>
                             <p class="lead"><?= htmlspecialchars($tvshow['overview']) ?></p>
                         <?php endif; ?>
-                        
+
                         <?php if (isset($tvshow['seasons']) && is_array($tvshow['seasons']) && !empty($tvshow['seasons'])): ?>
                             <h5 class="mt-4">Seasons</h5>
                             <div class="accordion" id="seasonsAccordion">
@@ -698,18 +703,18 @@ if ($page == 'discover') {
                                     <?php if (isset($season['season_number']) && $season['season_number'] > 0): ?>
                                         <div class="accordion-item">
                                             <h2 class="accordion-header" id="heading<?= $season['id'] ?>">
-                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
-                                                        data-bs-target="#collapse<?= $season['id'] ?>" aria-expanded="false" 
-                                                        aria-controls="collapse<?= $season['id'] ?>">
+                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                                    data-bs-target="#collapse<?= $season['id'] ?>" aria-expanded="false"
+                                                    aria-controls="collapse<?= $season['id'] ?>">
                                                     Season <?= $season['season_number'] ?> (<?= $season['episode_count'] ?? '?' ?> Episodes)
                                                 </button>
                                             </h2>
-                                            <div id="collapse<?= $season['id'] ?>" class="accordion-collapse collapse" 
-                                                 aria-labelledby="heading<?= $season['id'] ?>" data-bs-parent="#seasonsAccordion">
+                                            <div id="collapse<?= $season['id'] ?>" class="accordion-collapse collapse"
+                                                aria-labelledby="heading<?= $season['id'] ?>" data-bs-parent="#seasonsAccordion">
                                                 <div class="accordion-body d-flex">
                                                     <?php if (isset($season['poster_path']) && !empty($season['poster_path'])): ?>
-                                                        <img src="<?= TMDB_IMAGE_BASE_URL . 'w185' . $season['poster_path'] ?>" 
-                                                             class="me-3 rounded" alt="Season <?= $season['season_number'] ?>" style="max-height: 150px;">
+                                                        <img src="<?= TMDB_IMAGE_BASE_URL . 'w185' . $season['poster_path'] ?>"
+                                                            class="me-3 rounded" alt="Season <?= $season['season_number'] ?>" style="max-height: 150px;">
                                                     <?php endif; ?>
                                                     <div>
                                                         <h5>Season <?= $season['season_number'] ?></h5>
@@ -718,8 +723,8 @@ if ($page == 'discover') {
                                                         <?php else: ?>
                                                             <p class="text-muted">No overview available.</p>
                                                         <?php endif; ?>
-                                                        <a href="index.php?page=season&id=<?= $tvId ?>&season=<?= $season['season_number'] ?>" 
-                                                           class="btn btn-sm btn-primary">View Episodes</a>
+                                                        <a href="index.php?page=season&id=<?= $tvId ?>&season=<?= $season['season_number'] ?>"
+                                                            class="btn btn-sm btn-primary">View Episodes</a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -737,8 +742,8 @@ if ($page == 'discover') {
                                         <div class="card cast-card h-100">
                                             <a href="index.php?page=person&id=<?= $actor['id'] ?>">
                                                 <?php if (isset($actor['profile_path']) && !empty($actor['profile_path'])): ?>
-                                                    <img src="<?= TMDB_IMAGE_BASE_URL . 'w185' . $actor['profile_path'] ?>" 
-                                                         class="card-img-top" alt="<?= htmlspecialchars($actor['name']) ?>">
+                                                    <img src="<?= TMDB_IMAGE_BASE_URL . 'w185' . $actor['profile_path'] ?>"
+                                                        class="card-img-top" alt="<?= htmlspecialchars($actor['name']) ?>">
                                                 <?php else: ?>
                                                     <div class="no-image"><i class="fas fa-user"></i></div>
                                                 <?php endif; ?>
@@ -784,12 +789,12 @@ if ($page == 'discover') {
                                 <div class="col-6 col-md-2 mb-4">
                                     <div class="card content-card h-100">
                                         <a href="index.php?page=tvshow&id=<?= $similarShow['id'] ?>">
-                                            <img src="<?= TMDB_IMAGE_BASE_URL . 'w342' . $similarShow['poster_path'] ?>" 
-                                                 class="card-img-top" alt="<?= htmlspecialchars($similarShow['name'] ?? 'TV Show') ?>">
+                                            <img src="<?= TMDB_IMAGE_BASE_URL . 'w342' . $similarShow['poster_path'] ?>"
+                                                class="card-img-top" alt="<?= htmlspecialchars($similarShow['name'] ?? 'TV Show') ?>">
                                             <div class="card-body">
                                                 <h6 class="card-title"><?= htmlspecialchars($similarShow['name'] ?? 'Unknown title') ?></h6>
                                                 <div class="rating">
-                                                    <i class="fas fa-star text-warning"></i> 
+                                                    <i class="fas fa-star text-warning"></i>
                                                     <?= number_format($similarShow['vote_average'] ?? 0, 1) ?>
                                                 </div>
                                             </div>
@@ -818,14 +823,14 @@ if ($page == 'discover') {
                             <div class="col-6 col-md-3 col-lg-2 mb-4">
                                 <div class="card content-card h-100">
                                     <a href="index.php?page=movie&id=<?= $movie['id'] ?>">
-                                        <img src="<?= TMDB_IMAGE_BASE_URL . TMDB_POSTER_SIZE . $movie['poster_path'] ?>" 
-                                             class="card-img-top" alt="<?= htmlspecialchars($movie['title']) ?>">
+                                        <img src="<?= TMDB_IMAGE_BASE_URL . TMDB_POSTER_SIZE . $movie['poster_path'] ?>"
+                                            class="card-img-top" alt="<?= htmlspecialchars($movie['title']) ?>">
                                         <div class="card-body">
                                             <h6 class="card-title"><?= htmlspecialchars($movie['title']) ?></h6>
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <small class="text-muted"><?= substr($movie['release_date'], 0, 4) ?></small>
                                                 <span class="rating">
-                                                    <i class="fas fa-star text-warning"></i> 
+                                                    <i class="fas fa-star text-warning"></i>
                                                     <?= number_format($movie['vote_average'], 1) ?>
                                                 </span>
                                             </div>
@@ -860,71 +865,71 @@ if ($page == 'discover') {
             </div>
         </section>
     <?php elseif ($page == 'tvshows'): ?>
-    <?php
-    $currentPage = isset($_GET['tv_page']) ? intval($_GET['tv_page']) : 1;
-    $popularTVShows = $tmdb->getPopularTVShows($currentPage);
-    $totalPages = isset($popularTVShows['total_pages']) ? $popularTVShows['total_pages'] : 1;
-    ?>
-    <!-- TV Shows Page -->
-    <section class="py-5">
-        <div class="container">
-            <h1 class="mb-4">Popular TV Shows</h1>
-            <div class="row">
-                <?php if (isset($popularTVShows['results']) && is_array($popularTVShows['results'])): ?>
-                    <?php foreach ($popularTVShows['results'] as $tvshow): ?>
-                        <?php if (isset($tvshow['poster_path']) && !empty($tvshow['poster_path'])): ?>
-                            <div class="col-6 col-md-3 col-lg-2 mb-4">
-                                <div class="card content-card h-100">
-                                    <a href="index.php?page=tvshow&id=<?= $tvshow['id'] ?>">
-                                        <img src="<?= TMDB_IMAGE_BASE_URL . TMDB_POSTER_SIZE . $tvshow['poster_path'] ?>" 
-                                             class="card-img-top" alt="<?= htmlspecialchars($tvshow['name']) ?>">
-                                        <div class="card-body">
-                                            <h6 class="card-title"><?= htmlspecialchars($tvshow['name']) ?></h6>
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <small class="text-muted">
-                                                    <?= isset($tvshow['first_air_date']) && !empty($tvshow['first_air_date']) ? 
-                                                        substr($tvshow['first_air_date'], 0, 4) : 'N/A' ?>
-                                                </small>
-                                                <span class="rating">
-                                                    <i class="fas fa-star text-warning"></i> 
-                                                    <?= number_format($tvshow['vote_average'] ?? 0, 1) ?>
-                                                </span>
+        <?php
+        $currentPage = isset($_GET['tv_page']) ? intval($_GET['tv_page']) : 1;
+        $popularTVShows = $tmdb->getPopularTVShows($currentPage);
+        $totalPages = isset($popularTVShows['total_pages']) ? $popularTVShows['total_pages'] : 1;
+        ?>
+        <!-- TV Shows Page -->
+        <section class="py-5">
+            <div class="container">
+                <h1 class="mb-4">Popular TV Shows</h1>
+                <div class="row">
+                    <?php if (isset($popularTVShows['results']) && is_array($popularTVShows['results'])): ?>
+                        <?php foreach ($popularTVShows['results'] as $tvshow): ?>
+                            <?php if (isset($tvshow['poster_path']) && !empty($tvshow['poster_path'])): ?>
+                                <div class="col-6 col-md-3 col-lg-2 mb-4">
+                                    <div class="card content-card h-100">
+                                        <a href="index.php?page=tvshow&id=<?= $tvshow['id'] ?>">
+                                            <img src="<?= TMDB_IMAGE_BASE_URL . TMDB_POSTER_SIZE . $tvshow['poster_path'] ?>"
+                                                class="card-img-top" alt="<?= htmlspecialchars($tvshow['name']) ?>">
+                                            <div class="card-body">
+                                                <h6 class="card-title"><?= htmlspecialchars($tvshow['name']) ?></h6>
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <small class="text-muted">
+                                                        <?= isset($tvshow['first_air_date']) && !empty($tvshow['first_air_date']) ?
+                                                            substr($tvshow['first_air_date'], 0, 4) : 'N/A' ?>
+                                                    </small>
+                                                    <span class="rating">
+                                                        <i class="fas fa-star text-warning"></i>
+                                                        <?= number_format($tvshow['vote_average'] ?? 0, 1) ?>
+                                                    </span>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </a>
+                                        </a>
+                                    </div>
                                 </div>
-                            </div>
-                        <?php endif; ?>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <div class="col-12">
-                        <div class="alert alert-info">No TV shows available at this time.</div>
-                    </div>
-                <?php endif; ?>
-            </div>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <div class="col-12">
+                            <div class="alert alert-info">No TV shows available at this time.</div>
+                        </div>
+                    <?php endif; ?>
+                </div>
 
-            <!-- Pagination -->
-            <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-center">
-                    <li class="page-item <?= $currentPage <= 1 ? 'disabled' : '' ?>">
-                        <a class="page-link" href="index.php?page=tvshows&tv_page=<?= $currentPage - 1 ?>">Previous</a>
-                    </li>
-                    <?php
-                    $startPage = max(1, $currentPage - 2);
-                    $endPage = min($totalPages, $currentPage + 2);
-                    for ($i = $startPage; $i <= $endPage; $i++):
-                    ?>
-                        <li class="page-item <?= $i == $currentPage ? 'active' : '' ?>">
-                            <a class="page-link" href="index.php?page=tvshows&tv_page=<?= $i ?>"><?= $i ?></a>
+                <!-- Pagination -->
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item <?= $currentPage <= 1 ? 'disabled' : '' ?>">
+                            <a class="page-link" href="index.php?page=tvshows&tv_page=<?= $currentPage - 1 ?>">Previous</a>
                         </li>
-                    <?php endfor; ?>
-                    <li class="page-item <?= $currentPage >= $totalPages ? 'disabled' : '' ?>">
-                        <a class="page-link" href="index.php?page=tvshows&tv_page=<?= $currentPage + 1 ?>">Next</a>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-    </section>
+                        <?php
+                        $startPage = max(1, $currentPage - 2);
+                        $endPage = min($totalPages, $currentPage + 2);
+                        for ($i = $startPage; $i <= $endPage; $i++):
+                        ?>
+                            <li class="page-item <?= $i == $currentPage ? 'active' : '' ?>">
+                                <a class="page-link" href="index.php?page=tvshows&tv_page=<?= $i ?>"><?= $i ?></a>
+                            </li>
+                        <?php endfor; ?>
+                        <li class="page-item <?= $currentPage >= $totalPages ? 'disabled' : '' ?>">
+                            <a class="page-link" href="index.php?page=tvshows&tv_page=<?= $currentPage + 1 ?>">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </section>
     <?php elseif ($page == 'person' && isset($_GET['id'])): ?>
         <?php
         $personId = intval($_GET['id']);
@@ -936,8 +941,8 @@ if ($page == 'discover') {
                 <div class="row">
                     <div class="col-md-4 mb-4">
                         <?php if (isset($person['profile_path'])): ?>
-                            <img src="<?= TMDB_IMAGE_BASE_URL . TMDB_POSTER_SIZE . $person['profile_path'] ?>" 
-                                 class="img-fluid rounded shadow" alt="<?= htmlspecialchars($person['name']) ?>">
+                            <img src="<?= TMDB_IMAGE_BASE_URL . TMDB_POSTER_SIZE . $person['profile_path'] ?>"
+                                class="img-fluid rounded shadow" alt="<?= htmlspecialchars($person['name']) ?>">
                         <?php else: ?>
                             <div class="no-image-large rounded shadow d-flex align-items-center justify-content-center">
                                 <i class="fas fa-user fa-5x"></i>
@@ -959,7 +964,7 @@ if ($page == 'discover') {
                                     <?= htmlspecialchars($person['place_of_birth']) ?>
                                 </p>
                             <?php endif; ?>
-                            
+
                             <?php if (isset($person['external_ids']) && is_array($person['external_ids'])): ?>
                                 <h4 class="mt-4">Social Media</h4>
                                 <div class="social-links">
@@ -968,19 +973,19 @@ if ($page == 'discover') {
                                             <i class="fab fa-instagram"></i>
                                         </a>
                                     <?php endif; ?>
-                                    
+
                                     <?php if (isset($person['external_ids']['twitter_id']) && !empty($person['external_ids']['twitter_id'])): ?>
                                         <a href="https://twitter.com/<?= $person['external_ids']['twitter_id'] ?>" target="_blank" class="me-2">
                                             <i class="fab fa-twitter"></i>
                                         </a>
                                     <?php endif; ?>
-                                    
+
                                     <?php if (isset($person['external_ids']['facebook_id']) && !empty($person['external_ids']['facebook_id'])): ?>
                                         <a href="https://facebook.com/<?= $person['external_ids']['facebook_id'] ?>" target="_blank" class="me-2">
                                             <i class="fab fa-facebook"></i>
                                         </a>
                                     <?php endif; ?>
-                                    
+
                                     <?php if (isset($person['external_ids']['imdb_id']) && !empty($person['external_ids']['imdb_id'])): ?>
                                         <a href="https://www.imdb.com/name/<?= $person['external_ids']['imdb_id'] ?>" target="_blank">
                                             <i class="fab fa-imdb"></i>
@@ -1003,7 +1008,7 @@ if ($page == 'discover') {
                                 $knownFor = [];
                                 if (isset($person['combined_credits']['cast'])) {
                                     $knownFor = $person['combined_credits']['cast'];
-                                    usort($knownFor, function($a, $b) {
+                                    usort($knownFor, function ($a, $b) {
                                         return $b['popularity'] <=> $a['popularity'];
                                     });
                                     $knownFor = array_slice($knownFor, 0, 8);
@@ -1017,8 +1022,8 @@ if ($page == 'discover') {
                                         <div class="col-6 col-md-3 mb-4">
                                             <div class="card content-card h-100">
                                                 <a href="index.php?page=<?= $linkPage ?>&id=<?= $credit['id'] ?>">
-                                                    <img src="<?= TMDB_IMAGE_BASE_URL . 'w342' . $credit['poster_path'] ?>" 
-                                                         class="card-img-top" alt="<?= htmlspecialchars($title) ?>">
+                                                    <img src="<?= TMDB_IMAGE_BASE_URL . 'w342' . $credit['poster_path'] ?>"
+                                                        class="card-img-top" alt="<?= htmlspecialchars($title) ?>">
                                                     <div class="card-body">
                                                         <h6 class="card-title"><?= htmlspecialchars($title) ?></h6>
                                                         <?php if (isset($credit['character']) && !empty($credit['character'])): ?>
@@ -1034,12 +1039,12 @@ if ($page == 'discover') {
                             <h4 class="mt-4">Filmography</h4>
                             <ul class="nav nav-tabs" id="creditsTab" role="tablist">
                                 <li class="nav-item" role="presentation">
-                                    <button class="nav-link active" id="movies-tab" data-bs-toggle="tab" data-bs-target="#movies" 
-                                            type="button" role="tab" aria-controls="movies" aria-selected="true">Movies</button>
+                                    <button class="nav-link active" id="movies-tab" data-bs-toggle="tab" data-bs-target="#movies"
+                                        type="button" role="tab" aria-controls="movies" aria-selected="true">Movies</button>
                                 </li>
                                 <li class="nav-item" role="presentation">
-                                    <button class="nav-link" id="tvshows-tab" data-bs-toggle="tab" data-bs-target="#tvshows" 
-                                            type="button" role="tab" aria-controls="tvshows" aria-selected="false">TV Shows</button>
+                                    <button class="nav-link" id="tvshows-tab" data-bs-toggle="tab" data-bs-target="#tvshows"
+                                        type="button" role="tab" aria-controls="tvshows" aria-selected="false">TV Shows</button>
                                 </li>
                             </ul>
                             <div class="tab-content" id="creditsTabContent">
@@ -1061,7 +1066,7 @@ if ($page == 'discover') {
                                                         $movieCredits[] = $credit;
                                                     }
                                                 }
-                                                usort($movieCredits, function($a, $b) {
+                                                usort($movieCredits, function ($a, $b) {
                                                     $aYear = isset($a['release_date']) ? substr($a['release_date'], 0, 4) : 0;
                                                     $bYear = isset($b['release_date']) ? substr($b['release_date'], 0, 4) : 0;
                                                     return $bYear <=> $aYear;
@@ -1101,7 +1106,7 @@ if ($page == 'discover') {
                                                         $tvCredits[] = $credit;
                                                     }
                                                 }
-                                                usort($tvCredits, function($a, $b) {
+                                                usort($tvCredits, function ($a, $b) {
                                                     $aYear = isset($a['first_air_date']) ? substr($a['first_air_date'], 0, 4) : 0;
                                                     $bYear = isset($b['first_air_date']) ? substr($b['first_air_date'], 0, 4) : 0;
                                                     return $bYear <=> $aYear;
@@ -1130,219 +1135,219 @@ if ($page == 'discover') {
             </div>
         </section>
     <?php elseif ($page == 'season' && isset($_GET['id']) && isset($_GET['season'])): ?>
-    <?php
-    $tvId = intval($_GET['id']);
-    $seasonNumber = intval($_GET['season']);
-    $season = $tmdb->getTVSeasonDetails($tvId, $seasonNumber);
-    $tvDetails = $tmdb->getTVShowDetails($tvId);
-    ?>
-    <!-- Season Detail Page -->
-    <section class="py-5">
-        <div class="container">
-            <div class="d-flex align-items-center mb-4">
-                <h1 class="mb-0"><?= htmlspecialchars($tvDetails['name'] ?? 'TV Show') ?></h1>
-                <span class="mx-2">-</span>
-                <h2 class="mb-0">Season <?= $seasonNumber ?></h2>
-            </div>
-            <div class="row">
-                <div class="col-md-3 mb-4">
-                    <?php if (isset($season['poster_path']) && !empty($season['poster_path'])): ?>
-                        <img src="<?= TMDB_IMAGE_BASE_URL . TMDB_POSTER_SIZE . $season['poster_path'] ?>" 
-                             class="img-fluid rounded shadow" alt="Season <?= $seasonNumber ?>">
-                    <?php endif; ?>
-                    <div class="mt-3">
-                        <a href="index.php?page=tvshow&id=<?= $tvId ?>" class="btn btn-primary">
-                            <i class="fas fa-arrow-left"></i> Back to TV Show
-                        </a>
-                    </div>
+        <?php
+        $tvId = intval($_GET['id']);
+        $seasonNumber = intval($_GET['season']);
+        $season = $tmdb->getTVSeasonDetails($tvId, $seasonNumber);
+        $tvDetails = $tmdb->getTVShowDetails($tvId);
+        ?>
+        <!-- Season Detail Page -->
+        <section class="py-5">
+            <div class="container">
+                <div class="d-flex align-items-center mb-4">
+                    <h1 class="mb-0"><?= htmlspecialchars($tvDetails['name'] ?? 'TV Show') ?></h1>
+                    <span class="mx-2">-</span>
+                    <h2 class="mb-0">Season <?= $seasonNumber ?></h2>
                 </div>
-                <div class="col-md-9">
-                    <?php if (isset($season['overview']) && !empty($season['overview'])): ?>
-                        <div class="mb-4">
-                            <h4>Overview</h4>
-                            <p><?= htmlspecialchars($season['overview']) ?></p>
+                <div class="row">
+                    <div class="col-md-3 mb-4">
+                        <?php if (isset($season['poster_path']) && !empty($season['poster_path'])): ?>
+                            <img src="<?= TMDB_IMAGE_BASE_URL . TMDB_POSTER_SIZE . $season['poster_path'] ?>"
+                                class="img-fluid rounded shadow" alt="Season <?= $seasonNumber ?>">
+                        <?php endif; ?>
+                        <div class="mt-3">
+                            <a href="index.php?page=tvshow&id=<?= $tvId ?>" class="btn btn-primary">
+                                <i class="fas fa-arrow-left"></i> Back to TV Show
+                            </a>
                         </div>
-                    <?php endif; ?>
-                    <?php if (isset($season['episodes']) && is_array($season['episodes']) && count($season['episodes']) > 0): ?>
-                        <h4>Episodes</h4>
-                        <div class="list-group">
-                            <?php foreach ($season['episodes'] as $episode): ?>
-                                <div class="list-group-item list-group-item-action flex-column align-items-start">
-                                    <div class="d-flex w-100 justify-content-between align-items-center">
-                                        <h5 class="mb-1">
-                                            <?= $episode['episode_number'] ?>. <?= htmlspecialchars($episode['name'] ?? 'Episode '.$episode['episode_number']) ?>
-                                        </h5>
-                                        <?php if (isset($episode['air_date']) && !empty($episode['air_date'])): ?>
-                                            <small><?= date('M j, Y', strtotime($episode['air_date'])) ?></small>
-                                        <?php endif; ?>
-                                    </div>
-                                    <div class="row mt-2">
-                                        <div class="col-md-3">
-                                            <?php if (isset($episode['still_path']) && !empty($episode['still_path'])): ?>
-                                                <img src="<?= TMDB_IMAGE_BASE_URL . 'w300' . $episode['still_path'] ?>" 
-                                                     class="img-fluid rounded" alt="Episode <?= $episode['episode_number'] ?>">
+                    </div>
+                    <div class="col-md-9">
+                        <?php if (isset($season['overview']) && !empty($season['overview'])): ?>
+                            <div class="mb-4">
+                                <h4>Overview</h4>
+                                <p><?= htmlspecialchars($season['overview']) ?></p>
+                            </div>
+                        <?php endif; ?>
+                        <?php if (isset($season['episodes']) && is_array($season['episodes']) && count($season['episodes']) > 0): ?>
+                            <h4>Episodes</h4>
+                            <div class="list-group">
+                                <?php foreach ($season['episodes'] as $episode): ?>
+                                    <div class="list-group-item list-group-item-action flex-column align-items-start">
+                                        <div class="d-flex w-100 justify-content-between align-items-center">
+                                            <h5 class="mb-1">
+                                                <?= $episode['episode_number'] ?>. <?= htmlspecialchars($episode['name'] ?? 'Episode ' . $episode['episode_number']) ?>
+                                            </h5>
+                                            <?php if (isset($episode['air_date']) && !empty($episode['air_date'])): ?>
+                                                <small><?= date('M j, Y', strtotime($episode['air_date'])) ?></small>
                                             <?php endif; ?>
                                         </div>
-                                        <div class="col-md-9">
-                                            <?php if (isset($episode['overview']) && !empty($episode['overview'])): ?>
-                                                <p class="mb-1"><?= htmlspecialchars($episode['overview']) ?></p>
-                                            <?php else: ?>
-                                                <p class="mb-1 text-muted">No overview available.</p>
-                                            <?php endif; ?>
-                                            <div class="d-flex align-items-center mt-2">
-                                                <?php if (isset($episode['vote_average'])): ?>
-                                                    <span class="badge bg-primary me-2"><?= number_format($episode['vote_average'], 1) ?></span>
+                                        <div class="row mt-2">
+                                            <div class="col-md-3">
+                                                <?php if (isset($episode['still_path']) && !empty($episode['still_path'])): ?>
+                                                    <img src="<?= TMDB_IMAGE_BASE_URL . 'w300' . $episode['still_path'] ?>"
+                                                        class="img-fluid rounded" alt="Episode <?= $episode['episode_number'] ?>">
                                                 <?php endif; ?>
-                                                <small class="text-muted"><?= isset($episode['runtime']) ? $episode['runtime'] : 'N/A' ?> min</small>
+                                            </div>
+                                            <div class="col-md-9">
+                                                <?php if (isset($episode['overview']) && !empty($episode['overview'])): ?>
+                                                    <p class="mb-1"><?= htmlspecialchars($episode['overview']) ?></p>
+                                                <?php else: ?>
+                                                    <p class="mb-1 text-muted">No overview available.</p>
+                                                <?php endif; ?>
+                                                <div class="d-flex align-items-center mt-2">
+                                                    <?php if (isset($episode['vote_average'])): ?>
+                                                        <span class="badge bg-primary me-2"><?= number_format($episode['vote_average'], 1) ?></span>
+                                                    <?php endif; ?>
+                                                    <small class="text-muted"><?= isset($episode['runtime']) ? $episode['runtime'] : 'N/A' ?> min</small>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php else: ?>
-                        <div class="alert alert-info">No episodes information available.</div>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-    </section>
-    <?php elseif ($page == 'people'): ?>
-    <?php
-    $currentPage = isset($_GET['people_page']) ? intval($_GET['people_page']) : 1;
-    $timeWindow = isset($_GET['time_window']) ? $_GET['time_window'] : 'day';
-    $searchQuery = isset($_GET['person_query']) ? $_GET['person_query'] : '';
-    
-    // Check if we are searching or showing trending
-    if (!empty($searchQuery)) {
-        $peopleResults = $tmdb->searchPeople($searchQuery, $currentPage);
-        $pageTitle = 'Search Results for "' . htmlspecialchars($searchQuery) . '"';
-    } else {
-        // Use trending people
-        $peopleResults = $tmdb->getTrendingPeople($timeWindow, $currentPage);
-        $pageTitle = 'Trending People';
-    }
-    
-    $totalPages = isset($peopleResults['total_pages']) ? $peopleResults['total_pages'] : 1;
-    ?>
-    <!-- People Page -->
-    <section class="py-5">
-        <div class="container">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1><?= $pageTitle ?></h1>
-                <?php if (empty($searchQuery)): ?>
-                    <!-- Time window selector (only show when not searching) -->
-                    <div class="btn-group" role="group" aria-label="Time window selector">
-                        <a href="index.php?page=people&time_window=day&people_page=1" 
-                           class="btn <?= $timeWindow == 'day' ? 'btn-primary' : 'btn-outline-primary' ?>">Today</a>
-                        <a href="index.php?page=people&time_window=week&people_page=1" 
-                           class="btn <?= $timeWindow == 'week' ? 'btn-primary' : 'btn-outline-primary' ?>">This Week</a>
-                    </div>
-                <?php endif; ?>
-            </div>
-            
-            <!-- Person Search Form -->
-            <div class="card mb-4">
-                <div class="card-body">
-                    <form action="index.php" method="GET" class="row g-3">
-                        <input type="hidden" name="page" value="people">
-                        <div class="col-md-10">
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-search"></i></span>
-                                <input type="text" name="person_query" class="form-control" placeholder="Search for actors, directors, and more..." 
-                                       value="<?= htmlspecialchars($searchQuery) ?>">
+                                <?php endforeach; ?>
                             </div>
-                        </div>
-                        <div class="col-md-2">
-                            <button type="submit" class="btn btn-primary w-100">Search</button>
-                        </div>
-                    </form>
-                    <?php if (!empty($searchQuery)): ?>
-                        <div class="mt-3">
-                            <a href="index.php?page=people" class="btn btn-sm btn-outline-secondary">
-                                <i class="fas fa-arrow-left"></i> Back to Trending
-                            </a>
+                        <?php else: ?>
+                            <div class="alert alert-info">No episodes information available.</div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </section>
+    <?php elseif ($page == 'people'): ?>
+        <?php
+        $currentPage = isset($_GET['people_page']) ? intval($_GET['people_page']) : 1;
+        $timeWindow = isset($_GET['time_window']) ? $_GET['time_window'] : 'day';
+        $searchQuery = isset($_GET['person_query']) ? $_GET['person_query'] : '';
+
+        // Check if we are searching or showing trending
+        if (!empty($searchQuery)) {
+            $peopleResults = $tmdb->searchPeople($searchQuery, $currentPage);
+            $pageTitle = 'Search Results for "' . htmlspecialchars($searchQuery) . '"';
+        } else {
+            // Use trending people
+            $peopleResults = $tmdb->getTrendingPeople($timeWindow, $currentPage);
+            $pageTitle = 'Trending People';
+        }
+
+        $totalPages = isset($peopleResults['total_pages']) ? $peopleResults['total_pages'] : 1;
+        ?>
+        <!-- People Page -->
+        <section class="py-5">
+            <div class="container">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1><?= $pageTitle ?></h1>
+                    <?php if (empty($searchQuery)): ?>
+                        <!-- Time window selector (only show when not searching) -->
+                        <div class="btn-group" role="group" aria-label="Time window selector">
+                            <a href="index.php?page=people&time_window=day&people_page=1"
+                                class="btn <?= $timeWindow == 'day' ? 'btn-primary' : 'btn-outline-primary' ?>">Today</a>
+                            <a href="index.php?page=people&time_window=week&people_page=1"
+                                class="btn <?= $timeWindow == 'week' ? 'btn-primary' : 'btn-outline-primary' ?>">This Week</a>
                         </div>
                     <?php endif; ?>
                 </div>
-            </div>
-            
-            <div class="row">
-                <?php if (isset($peopleResults['results']) && count($peopleResults['results']) > 0): ?>
-                    <?php foreach ($peopleResults['results'] as $index => $person): ?>
-                        <div class="col-6 col-md-3 col-lg-2 mb-4" data-aos="fade-up" data-aos-delay="<?= $index % 6 * 50 ?>">
-                            <div class="card content-card h-100">
-                                <a href="index.php?page=person&id=<?= $person['id'] ?>">
-                                    <?php if (isset($person['profile_path']) && $person['profile_path']): ?>
-                                        <img src="<?= TMDB_IMAGE_BASE_URL . TMDB_POSTER_SIZE . $person['profile_path'] ?>" 
-                                             class="card-img-top" alt="<?= htmlspecialchars($person['name']) ?>">
-                                    <?php else: ?>
-                                        <div class="no-image">
-                                            <i class="fas fa-user fa-3x"></i>
-                                        </div>
-                                    <?php endif; ?>
-                                    <div class="card-body">
-                                        <h6 class="card-title"><?= htmlspecialchars($person['name']) ?></h6>
-                                        <?php if (isset($person['known_for_department'])): ?>
-                                            <span class="badge bg-secondary mb-2"><?= $person['known_for_department'] ?></span>
+
+                <!-- Person Search Form -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <form action="index.php" method="GET" class="row g-3">
+                            <input type="hidden" name="page" value="people">
+                            <div class="col-md-10">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                    <input type="text" name="person_query" class="form-control" placeholder="Search for actors, directors, and more..."
+                                        value="<?= htmlspecialchars($searchQuery) ?>">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary w-100">Search</button>
+                            </div>
+                        </form>
+                        <?php if (!empty($searchQuery)): ?>
+                            <div class="mt-3">
+                                <a href="index.php?page=people" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-arrow-left"></i> Back to Trending
+                                </a>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <?php if (isset($peopleResults['results']) && count($peopleResults['results']) > 0): ?>
+                        <?php foreach ($peopleResults['results'] as $index => $person): ?>
+                            <div class="col-6 col-md-3 col-lg-2 mb-4" data-aos="fade-up" data-aos-delay="<?= $index % 6 * 50 ?>">
+                                <div class="card content-card h-100">
+                                    <a href="index.php?page=person&id=<?= $person['id'] ?>">
+                                        <?php if (isset($person['profile_path']) && $person['profile_path']): ?>
+                                            <img src="<?= TMDB_IMAGE_BASE_URL . TMDB_POSTER_SIZE . $person['profile_path'] ?>"
+                                                class="card-img-top" alt="<?= htmlspecialchars($person['name']) ?>">
+                                        <?php else: ?>
+                                            <div class="no-image">
+                                                <i class="fas fa-user fa-3x"></i>
+                                            </div>
                                         <?php endif; ?>
-                                        <p class="small text-muted">
-                                            <?php 
+                                        <div class="card-body">
+                                            <h6 class="card-title"><?= htmlspecialchars($person['name']) ?></h6>
+                                            <?php if (isset($person['known_for_department'])): ?>
+                                                <span class="badge bg-secondary mb-2"><?= $person['known_for_department'] ?></span>
+                                            <?php endif; ?>
+                                            <p class="small text-muted">
+                                                <?php
                                                 if (isset($person['known_for']) && !empty($person['known_for'])) {
-                                                    $knownTitles = array_map(function($item) {
+                                                    $knownTitles = array_map(function ($item) {
                                                         return isset($item['title']) ? $item['title'] : $item['name'];
                                                     }, array_slice($person['known_for'], 0, 2));
                                                     echo htmlspecialchars(implode(', ', $knownTitles));
                                                 }
-                                            ?>
-                                        </p>
-                                        <?php if (isset($person['popularity'])): ?>
-                                            <div class="d-flex align-items-center mt-2">
-                                                <i class="fas fa-fire-alt text-danger me-1"></i>
-                                                <small><?= number_format($person['popularity'], 1) ?></small>
-                                            </div>
-                                        <?php endif; ?>
-                                    </div>
-                                </a>
+                                                ?>
+                                            </p>
+                                            <?php if (isset($person['popularity'])): ?>
+                                                <div class="d-flex align-items-center mt-2">
+                                                    <i class="fas fa-fire-alt text-danger me-1"></i>
+                                                    <small><?= number_format($person['popularity'], 1) ?></small>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </a>
+                                </div>
                             </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <div class="col-12">
+                            <?php if (!empty($searchQuery)): ?>
+                                <div class="alert alert-info">No people found matching "<?= htmlspecialchars($searchQuery) ?>".</div>
+                            <?php else: ?>
+                                <div class="alert alert-info">No trending people found.</div>
+                            <?php endif; ?>
                         </div>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <div class="col-12">
-                        <?php if (!empty($searchQuery)): ?>
-                            <div class="alert alert-info">No people found matching "<?= htmlspecialchars($searchQuery) ?>".</div>
-                        <?php else: ?>
-                            <div class="alert alert-info">No trending people found.</div>
-                        <?php endif; ?>
-                    </div>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Pagination -->
+                <?php if ($totalPages > 1): ?>
+                    <nav aria-label="Page navigation" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item <?= $currentPage <= 1 ? 'disabled' : '' ?>">
+                                <a class="page-link" href="<?= '?' . http_build_query(array_merge($_GET, ['people_page' => $currentPage - 1])) ?>">Previous</a>
+                            </li>
+                            <?php
+                            $startPage = max(1, $currentPage - 2);
+                            $endPage = min($totalPages, $currentPage + 2);
+                            for ($i = $startPage; $i <= $endPage; $i++):
+                            ?>
+                                <li class="page-item <?= $i == $currentPage ? 'active' : '' ?>">
+                                    <a class="page-link" href="<?= '?' . http_build_query(array_merge($_GET, ['people_page' => $i])) ?>"><?= $i ?></a>
+                                </li>
+                            <?php endfor; ?>
+
+                            <li class="page-item <?= $currentPage >= $totalPages ? 'disabled' : '' ?>">
+                                <a class="page-link" href="<?= '?' . http_build_query(array_merge($_GET, ['people_page' => $currentPage + 1])) ?>">Next</a>
+                            </li>
+                        </ul>
+                    </nav>
                 <?php endif; ?>
             </div>
-            
-            <!-- Pagination -->
-            <?php if ($totalPages > 1): ?>
-                <nav aria-label="Page navigation" class="mt-4">
-                    <ul class="pagination justify-content-center">
-                        <li class="page-item <?= $currentPage <= 1 ? 'disabled' : '' ?>">
-                            <a class="page-link" href="<?= '?' . http_build_query(array_merge($_GET, ['people_page' => $currentPage - 1])) ?>">Previous</a>
-                        </li>
-                        <?php 
-                        $startPage = max(1, $currentPage - 2);
-                        $endPage = min($totalPages, $currentPage + 2);
-                        for ($i = $startPage; $i <= $endPage; $i++):   
-                        ?>
-                            <li class="page-item <?= $i == $currentPage ? 'active' : '' ?>">
-                                <a class="page-link" href="<?= '?' . http_build_query(array_merge($_GET, ['people_page' => $i])) ?>"><?= $i ?></a>
-                            </li>
-                        <?php endfor; ?>
-                        
-                        <li class="page-item <?= $currentPage >= $totalPages ? 'disabled' : '' ?>">
-                            <a class="page-link" href="<?= '?' . http_build_query(array_merge($_GET, ['people_page' => $currentPage + 1])) ?>">Next</a>
-                        </li>
-                    </ul>
-                </nav>
-            <?php endif; ?>
-        </div>
-    </section>
+        </section>
     <?php endif; ?>
 
     <!-- Footer -->
@@ -1354,8 +1359,18 @@ if ($page == 'discover') {
                     <p class="small">This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
                 </div>
                 <div class="col-md-6 text-md-end">
-                    <img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_short-8e7b30f73a4020692ccca9c88bafe5dcb6f8a62a4c6bc55cd9ba82bb2cd95f6c.svg" 
-                         alt="TMDB Logo" style="max-height: 40px;">
+                    <img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_short-8e7b30f73a4020692ccca9c88bafe5dcb6f8a62a4c6bc55cd9ba82bb2cd95f6c.svg"
+                        alt="TMDB Logo" style="max-height: 40px;">
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12 text-center">
+                    <p class="small mb-0">
+                        &copy; <?php echo date("Y"); ?> TMDB Explorer | manases kamau. All Rights Reserved. |
+                        <a href="https://code-craft-website-solutions-2d68a0b57273.herokuapp.com/contact.php" target="_blank" class="text-white">
+                            Contact Us
+                        </a>
+                    </p>
                 </div>
             </div>
         </div>
@@ -1372,14 +1387,15 @@ if ($page == 'discover') {
                 duration: 800,
                 once: true
             });
-            
+
             // Hero Slideshow Logic
             const slides = document.querySelectorAll('.hero-slide');
             const indicators = document.querySelectorAll('.hero-indicator');
             const nextBtn = document.querySelector('.next-slide');
             const prevBtn = document.querySelector('.prev-slide');
-            
+
             if (slides.length > 0) {
+
                 let currentSlide = 0;
                 let isAnimating = false;
                 let slideInterval = setInterval(nextSlide, 7000); // Auto slide every 7 seconds
@@ -1399,7 +1415,7 @@ if ($page == 'discover') {
                             slide.classList.remove('active');
                         }
                     });
-                    
+
                     // Set active indicator
                     indicators.forEach((indicator, i) => {
                         if (i === 0) {
@@ -1409,43 +1425,43 @@ if ($page == 'discover') {
                         }
                     });
                 }
-                
+
                 function nextSlide() {
                     if (isAnimating) return;
                     goToSlide((currentSlide + 1) % slides.length);
                 }
-                
+
                 function prevSlide() {
                     if (isAnimating) return;
                     goToSlide(currentSlide === 0 ? slides.length - 1 : currentSlide - 1);
                 }
-                
+
                 function goToSlide(n) {
                     if (currentSlide === n || isAnimating) return;
                     isAnimating = true;
-                    
+
                     // First make the target slide visible but transparent
                     slides[n].style.visibility = 'visible';
                     slides[n].style.opacity = '0';
-                    
+
                     // Wait a tiny bit to ensure the visibility change takes effect
                     setTimeout(() => {
                         // Now fade out the current slide and fade in the next slide
                         slides[currentSlide].style.opacity = '0';
                         slides[n].style.opacity = '1';
-                        
+
                         // Remove active class from current slide and indicator
                         slides[currentSlide].classList.remove('active');
                         indicators[currentSlide].classList.remove('active');
-                        
+
                         // Add active class to new slide and indicator
                         slides[n].classList.add('active');
                         indicators[n].classList.add('active');
-                        
+
                         // Update current slide index
                         const previousSlide = currentSlide;
                         currentSlide = n;
-                        
+
                         // After transition completes, hide the previous slide
                         setTimeout(() => {
                             slides[previousSlide].style.visibility = 'hidden';
@@ -1453,7 +1469,7 @@ if ($page == 'discover') {
                         }, 1000); // Match this with CSS transition time
                     }, 50);
                 }
-                
+
                 // Set up event listeners for controls
                 if (nextBtn) {
                     nextBtn.addEventListener('click', function(e) {
@@ -1463,7 +1479,7 @@ if ($page == 'discover') {
                         slideInterval = setInterval(nextSlide, 7000);
                     });
                 }
-                
+
                 if (prevBtn) {
                     prevBtn.addEventListener('click', function(e) {
                         e.preventDefault();
@@ -1472,7 +1488,7 @@ if ($page == 'discover') {
                         slideInterval = setInterval(nextSlide, 7000);
                     });
                 }
-                
+
                 // Set up event listeners for indicators
                 indicators.forEach(function(indicator, index) {
                     indicator.addEventListener('click', function() {
@@ -1482,7 +1498,7 @@ if ($page == 'discover') {
                         slideInterval = setInterval(nextSlide, 7000);
                     });
                 });
-                
+
                 // Keyboard navigation
                 document.addEventListener('keydown', function(e) {
                     if (e.key === 'ArrowLeft') {
@@ -1495,7 +1511,7 @@ if ($page == 'discover') {
                         slideInterval = setInterval(nextSlide, 7000);
                     }
                 });
-                
+
                 // Pause slideshow when tab is not visible
                 document.addEventListener('visibilitychange', function() {
                     if (document.hidden) {
@@ -1508,4 +1524,5 @@ if ($page == 'discover') {
         });
     </script>
 </body>
+
 </html>

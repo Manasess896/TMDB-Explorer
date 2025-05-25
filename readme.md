@@ -176,3 +176,7 @@ The application integrates with The Movie Database (TMDB) API v3. Key aspects of
 ## Credits
 
 This application uses the TMDB API but is not endorsed or certified by TMDB. It is developed for educational and personal use only.
+
+## Contact
+
+For any inquiries, please visit the [Contact Page](https://code-craft-website-solutions-2d68a0b57273.herokuapp.com/contact.php).
