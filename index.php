@@ -1407,8 +1407,14 @@ if ($page == 'discover') {
             </div>
             <div class="row mt-3">
                 <div class="col-12 text-center">
+                    <div class="container">
+                        <p class="text-center mb-0">Created by @manases</p>
+                    </div>
                     <p class="small mb-0">
-                        &copy; <?php echo date("Y"); ?>Manases kamau &AMP; TMDB Explorer | Created by @manases | All Rights Reserved. |
+                        &copy; <?php echo date("Y"); ?> Manases Kamau &amp; TMDB Explorer
+                        | All Rights Reserved. |<a href="https://instagram.com/manases___" target="_blank" class="text-white">
+                            <i class="fab fa-instagram"></i>
+                        </a>|
                         <a href="https://github.com/manasess896" target="_blank" class="text-white">
                             GitHub
                         </a> |
