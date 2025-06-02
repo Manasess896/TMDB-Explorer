@@ -1,5 +1,5 @@
 <?php
-
+// this is a centralized TMDB API client for php 
 class TMDBClient {
     private $apiKey;
     private $baseUrl = 'https://api.themoviedb.org/3';
